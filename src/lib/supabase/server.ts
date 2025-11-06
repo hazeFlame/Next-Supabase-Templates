@@ -38,3 +38,19 @@ export async function createSSRSassClient() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return new SassClient(client as any, ClientType.SERVER);
 }
+
+// Anonymous, cookie-less server client for read-only access (Edge/RSC friendly)
+export function createServerAnonClient() {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+    const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+    if (!url || !anon) {
+        throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY');
+    }
+    return createClient<Database>(url, anon, {
+        auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+        },
+        global: { fetch },
+    });
+}
